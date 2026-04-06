@@ -6,28 +6,33 @@ import { generateLiveSensorReading, DEMO_DEVICES } from "./data";
 type Listener = (...args: unknown[]) => void;
 
 class MockSocket {
-  private listeners: Record<string, Listener[]> = {};
+  private _listeners: Record<string, Listener[]> = {};
   private intervals: ReturnType<typeof setInterval>[] = [];
   public connected = true;
   public id = "demo-socket-id";
 
   on(event: string, fn: Listener) {
-    if (!this.listeners[event]) this.listeners[event] = [];
-    this.listeners[event].push(fn);
+    if (!this._listeners[event]) this._listeners[event] = [];
+    this._listeners[event].push(fn);
     return this;
   }
 
   off(event: string, fn?: Listener) {
     if (!fn) {
-      delete this.listeners[event];
-    } else if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter((l) => l !== fn);
+      delete this._listeners[event];
+    } else if (this._listeners[event]) {
+      this._listeners[event] = this._listeners[event].filter((l) => l !== fn);
     }
     return this;
   }
 
+  // Socket.IO compatible method to get listeners for an event
+  listeners(event: string): Listener[] {
+    return this._listeners[event] || [];
+  }
+
   emit(event: string, ...args: unknown[]) {
-    (this.listeners[event] || []).forEach((fn) => fn(...args));
+    (this._listeners[event] || []).forEach((fn) => fn(...args));
     return this;
   }
 
@@ -35,7 +40,7 @@ class MockSocket {
     this.connected = false;
     this.intervals.forEach(clearInterval);
     this.intervals = [];
-    this.listeners = {};
+    this._listeners = {};
   }
 
   connect() {
