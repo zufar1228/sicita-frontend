@@ -14,7 +14,6 @@ import { getBackendUrl } from "@/lib/demo/utils";
 
 import { AppSidebar } from "@/components/layout/dashboard/AppSidebar";
 import { SiteHeader } from "@/components/layout/dashboard/SiteHeader";
-import { DemoBanner } from "@/components/DemoBanner";
 import { SelectedDeviceProvider } from "../../contexts/SelectedDeviceContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -133,7 +132,6 @@ export default function DashboardAppLayout({
   return (
     <SelectedDeviceProvider>
       <SidebarProvider>
-        <DemoBanner />
         <div className="flex h-screen w-full bg-muted/40 dark:bg-muted/20">
           <AppSidebar />
           <MainContentArea>
