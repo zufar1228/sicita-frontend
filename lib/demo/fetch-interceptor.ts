@@ -76,14 +76,14 @@ function handleDemoRequest(url: string, options?: RequestInit): Response | null 
       });
     }
 
-    // GET /api/sensor-data
+    // GET /api/sensor-data or /api/sensor-data/history/:deviceId
     if (pathname === "/api/sensor-data" || pathname.startsWith("/api/sensor-data")) {
-      const deviceId = searchParams.get("deviceId") || searchParams.get("device_id") || DEMO_DEVICES[0].device_id;
+      // Extract device ID from path like /api/sensor-data/history/demo-device-001
+      const historyMatch = pathname.match(/\/api\/sensor-data\/history\/(.+)/);
+      const deviceId = historyMatch?.[1] || searchParams.get("deviceId") || searchParams.get("device_id") || DEMO_DEVICES[0].device_id;
       const history = generateSensorHistory(deviceId, 48);
-      return jsonResponse({
-        data: history,
-        total: history.length,
-      });
+      // Return array directly for history endpoints (page expects SensorData[])
+      return jsonResponse(history);
     }
 
     // GET /api/users
