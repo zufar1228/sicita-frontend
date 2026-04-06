@@ -16,12 +16,10 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">
-          SiCita
-          {isDemoMode && <span className="text-primary ml-1">- mode demo</span>}
-        </h1>
+        <h1 className="text-base font-medium">SiCita</h1>
 
         <Image src="/wave.png" alt="Logo Aplikasi" width={30} height={30} />
+        {isDemoMode && <span className="text-sm font-medium text-primary">- mode demo</span>}
       </div>
     </header>
   );
