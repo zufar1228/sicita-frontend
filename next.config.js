@@ -13,7 +13,7 @@ const nextConfig = {
 const pwaConfig = {
   dest: "public",
   disable: isDevelopment, // next-pwa akan dinonaktifkan di development
-  swSrc: "public/sw.js", // Anda menggunakan custom service worker
+  swSrc: "worker/sw.js", // Source service worker file (not in public)
 };
 
 // Inisialisasi plugin PWA dengan konfigurasinya
