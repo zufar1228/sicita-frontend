@@ -42,11 +42,12 @@ export default function DashboardAppLayout({
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const { isDemoMode } = useDemo();
+  const { isDemoMode, isHydrated } = useDemo();
   const apiUrl = getBackendUrl();
 
   // useEffect untuk proteksi sesi
   useEffect(() => {
+    if (!isHydrated) return; // Wait for hydration to check demo mode
     if (isDemoMode) return; // Skip auth check in demo mode
     if (status === "loading") return;
     if (status === "unauthenticated") {
@@ -55,10 +56,11 @@ export default function DashboardAppLayout({
         (typeof window !== "undefined" ? window.location.search : "");
       router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isDemoMode, status, router, pathname]);
+  }, [isHydrated, isDemoMode, status, router, pathname]);
 
   // ▼▼▼ useEffect BARU UNTUK CEK KEDALUWARSA TOKEN ▼▼▼
   useEffect(() => {
+    if (!isHydrated) return; // Wait for hydration
     if (isDemoMode) return; // Skip token check in demo mode
     if (status === "authenticated" && session?.user?.backendToken) {
       // Decode token untuk mendapatkan waktu kedaluwarsa (exp)
@@ -92,10 +94,11 @@ export default function DashboardAppLayout({
       // Ini sangat penting untuk mencegah memory leak!
       return () => clearInterval(intervalId);
     }
-  }, [isDemoMode, status, session]); // Dijalankan setiap kali status atau sesi berubah
+  }, [isDemoMode, status, session, isHydrated]); // Dijalankan setiap kali status atau sesi berubah
 
   // useEffect untuk listener socket global
   useEffect(() => {
+    if (!isHydrated) return; // Wait for hydration
     if (isDemoMode) return; // Skip socket in demo mode (pages handle their own mock sockets)
     if (status === "authenticated" && session?.user?.backendToken && apiUrl) {
       const socket: Socket<DashboardLayoutSocketEvents> = getSocket(
@@ -116,9 +119,10 @@ export default function DashboardAppLayout({
         );
       };
     }
-  }, [status, session?.user?.backendToken, apiUrl, router]);
+  }, [isHydrated, status, session?.user?.backendToken, apiUrl, router, isDemoMode]);
 
-  if (!isDemoMode && (status === "loading" || status === "unauthenticated")) {
+  // Show loading while hydrating or checking auth
+  if (!isHydrated || (!isDemoMode && (status === "loading" || status === "unauthenticated"))) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background text-muted-foreground">
         <p>Memuat sesi pengguna...</p>

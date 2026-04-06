@@ -7,12 +7,14 @@ import { disconnectDemoSocket } from "./mock-socket";
 
 interface DemoContextType {
   isDemoMode: boolean;
+  isHydrated: boolean; // Flag to indicate if we've checked localStorage
   enterDemoMode: () => void;
   exitDemoMode: () => void;
 }
 
 const DemoContext = createContext<DemoContextType>({
   isDemoMode: false,
+  isHydrated: false,
   enterDemoMode: () => {},
   exitDemoMode: () => {},
 });
@@ -21,16 +23,18 @@ const DEMO_KEY = "sicita_demo_mode";
 
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Initialize from localStorage on mount
+  // Check localStorage after hydration and install interceptor if in demo mode
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(DEMO_KEY);
-      if (stored === "true") {
-        setIsDemoMode(true);
-        installDemoFetchInterceptor();
-      }
+    const stored = localStorage.getItem(DEMO_KEY);
+    const isDemo = stored === "true";
+    
+    if (isDemo) {
+      setIsDemoMode(true);
+      installDemoFetchInterceptor();
     }
+    setIsHydrated(true);
   }, []);
 
   const enterDemoMode = useCallback(() => {
@@ -51,7 +55,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <DemoContext.Provider value={{ isDemoMode, enterDemoMode, exitDemoMode }}>
+    <DemoContext.Provider value={{ isDemoMode, isHydrated, enterDemoMode, exitDemoMode }}>
       {children}
     </DemoContext.Provider>
   );

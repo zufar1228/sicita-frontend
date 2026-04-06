@@ -14,7 +14,16 @@ import { DEMO_SESSION } from "@/lib/demo/data";
 
 export function useSession() {
   const nextAuth = useNextAuthSession();
-  const { isDemoMode } = useDemo();
+  const { isDemoMode, isHydrated } = useDemo();
+
+  // Return loading state until hydration is complete
+  if (!isHydrated) {
+    return {
+      data: null,
+      status: "loading" as const,
+      update: async () => null,
+    };
+  }
 
   if (isDemoMode) {
     return {
