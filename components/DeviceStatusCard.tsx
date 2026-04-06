@@ -491,19 +491,15 @@ export default function DeviceStatusCard({
         className={`shadow-lg rounded-lg overflow-hidden ${cardBorderColor} ${cardBgColor}`}
       >
         <CardHeader className="pb-3 pt-4 px-4">
-          <div className="flex justify-between items-start gap-2">
-            <div className="min-w-0 flex-1">
-              <CardTitle className="text-base font-semibold truncate flex items-center">
-                {mainIcon}
-                <span className="ml-2 truncate">
-                  {currentDevice.name || currentDevice.device_id}
-                </span>
-              </CardTitle>
-            </div>
-            <div className="flex flex-col items-end space-y-1 flex-shrink-0">
-              {statusBadges}
-            </div>
+          <div className="flex flex-wrap gap-1 mb-1">
+            {statusBadges}
           </div>
+          <CardTitle className="text-base font-semibold truncate flex items-center">
+            {mainIcon}
+            <span className="ml-2 truncate">
+              {currentDevice.name || currentDevice.device_id}
+            </span>
+          </CardTitle>
           <CardDescription className="text-xs truncate pt-1">
             {currentDevice.location || "Lokasi tidak diatur"}
           </CardDescription>
@@ -561,19 +557,15 @@ export default function DeviceStatusCard({
       className={`shadow-lg transition-all hover:shadow-xl rounded-lg overflow-hidden ${cardBorderColor} ${cardBgColor}`}
     >
       <CardHeader className="pb-3 pt-4 px-4">
-        <div className="flex justify-between items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-base font-semibold truncate flex items-center">
-              {mainIcon}
-              <span className="ml-2 truncate">
-                {currentDevice.name || currentDevice.device_id}
-              </span>
-            </CardTitle>
-          </div>
-          <div className="flex flex-col items-end space-y-1 flex-shrink-0">
-            {statusBadges}
-          </div>
+        <div className="flex flex-wrap gap-1 mb-1">
+          {statusBadges}
         </div>
+        <CardTitle className="text-base font-semibold truncate flex items-center">
+          {mainIcon}
+          <span className="ml-2 truncate">
+            {currentDevice.name || currentDevice.device_id}
+          </span>
+        </CardTitle>
         <CardDescription className="text-xs truncate pt-1">
           {currentDevice.location || "Lokasi tidak diatur"}
         </CardDescription>
