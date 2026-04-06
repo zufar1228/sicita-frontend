@@ -7,6 +7,7 @@ import {
   DEMO_NOTIFICATION_PREFERENCES,
   generateDemoAlerts,
   generateSensorHistory,
+  generateLiveSensorReading,
 } from "./data";
 
 // Parse URL path and return mock response
@@ -22,8 +23,19 @@ function handleDemoRequest(url: string, options?: RequestInit): Response | null 
       return jsonResponse(DEMO_DEVICES);
     }
 
+    // GET /api/devices/:id/latest-reading (must be before general /api/devices/:id)
+    const latestReadingMatch = pathname.match(/^\/api\/devices\/([^/]+)\/latest-reading$/);
+    if (latestReadingMatch && (!options?.method || options.method === "GET")) {
+      const deviceId = latestReadingMatch[1];
+      const device = DEMO_DEVICES.find((d) => d.device_id === deviceId);
+      if (device) {
+        return jsonResponse(generateLiveSensorReading(deviceId));
+      }
+      return jsonResponse({ message: "Device not found" }, 404);
+    }
+
     // GET /api/devices/:id
-    const deviceMatch = pathname.match(/^\/api\/devices\/(.+)$/);
+    const deviceMatch = pathname.match(/^\/api\/devices\/([^/]+)$/);
     if (deviceMatch && (!options?.method || options.method === "GET")) {
       const device = DEMO_DEVICES.find((d) => d.device_id === deviceMatch[1]);
       return device ? jsonResponse(device) : jsonResponse({ message: "Device not found" }, 404);
