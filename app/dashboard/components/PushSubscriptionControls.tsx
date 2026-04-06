@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
+import { useDemo } from "@/lib/demo/context";
 
 // Fungsi utilitas
 function urlBase64ToUint8Array(base64String: string) {
@@ -55,6 +56,7 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 
 export default function PushSubscriptionControls() {
   const { data: session, status: sessionStatus } = useSession();
+  const { isDemoMode } = useDemo();
   const [isPushSubscribed, setIsPushSubscribed] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +68,15 @@ export default function PushSubscriptionControls() {
   const apiUrl = getBackendUrl();
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
+  // Demo mode: check localStorage for simulated subscription state
   useEffect(() => {
+    if (isDemoMode) {
+      const demoSub = typeof window !== "undefined" && localStorage.getItem("sicita_demo_push_subscribed");
+      setIsPushSubscribed(demoSub === "true");
+      setNotificationPerm("default");
+      setIsProcessing(false);
+      return;
+    }
     if (typeof window !== "undefined" && "Notification" in window) {
       setNotificationPerm(Notification.permission);
     }
@@ -118,6 +128,18 @@ export default function PushSubscriptionControls() {
   }, [sessionStatus]);
 
   const handleSubscribe = useCallback(async () => {
+    // Demo mode: simulate subscription
+    if (isDemoMode) {
+      setIsProcessing(true);
+      setTimeout(() => {
+        localStorage.setItem("sicita_demo_push_subscribed", "true");
+        setIsPushSubscribed(true);
+        setIsProcessing(false);
+        toast.success("Berhasil Berlangganan Notifikasi! (Demo)");
+      }, 800);
+      return;
+    }
+
     if (
       !serviceWorkerReg ||
       sessionStatus !== "authenticated" ||
@@ -216,10 +238,23 @@ export default function PushSubscriptionControls() {
     sessionStatus,
     session?.user?.backendToken,
     notificationPerm,
-    setNotificationPerm, // Tambahkan setNotificationPerm jika belum ada
+    setNotificationPerm,
+    isDemoMode,
   ]);
 
   const handleUnsubscribe = useCallback(async () => {
+    // Demo mode: simulate unsubscription
+    if (isDemoMode) {
+      setIsProcessing(true);
+      setTimeout(() => {
+        localStorage.removeItem("sicita_demo_push_subscribed");
+        setIsPushSubscribed(false);
+        setIsProcessing(false);
+        toast.success("Berhasil Berhenti Berlangganan Notifikasi. (Demo)");
+      }, 800);
+      return;
+    }
+
     if (
       !serviceWorkerReg ||
       !isPushSubscribed ||
@@ -299,6 +334,7 @@ export default function PushSubscriptionControls() {
     apiUrl,
     sessionStatus,
     session?.user?.backendToken,
+    isDemoMode,
   ]);
 
   if (sessionStatus !== "authenticated") {
@@ -319,7 +355,7 @@ export default function PushSubscriptionControls() {
     );
   }
 
-  if (notificationPerm === "denied") {
+  if (!isDemoMode && notificationPerm === "denied") {
     return (
       <Card className=" w-full max-w-sm mx-auto shadow-md border-yellow-500/50 bg-yellow-50 dark:bg-yellow-900/20">
         <CardHeader className="pb-1 pt-1">

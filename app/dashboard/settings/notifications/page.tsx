@@ -19,10 +19,13 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Loader2 } from "lucide-react"; // Impor Loader2 jika belum ada
+import { useDemo } from "@/lib/demo/context";
+import { DEMO_DEVICES } from "@/lib/demo/data";
 
 export default function NotificationPreferencesPage() {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
+  const { isDemoMode } = useDemo();
 
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<Set<string>>(
@@ -33,6 +36,8 @@ export default function NotificationPreferencesPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Demo mode: simulate subscription state
+  const [demoSubscribed, setDemoSubscribed] = useState<boolean>(false);
 
   // PERBAIKAN: Deklarasi useState yang benar
   const [_serviceWorkerRegistration, setServiceWorkerRegistration] = // Variabel state (serviceWorkerRegistration) di-prefix _ karena tidak dibaca
@@ -40,16 +45,40 @@ export default function NotificationPreferencesPage() {
 
   const backendUrl = getBackendUrl();
 
+  // Demo mode initialization
   useEffect(() => {
+    if (!isDemoMode) return;
+    const sub = typeof window !== "undefined" && localStorage.getItem("sicita_demo_push_subscribed") === "true";
+    setDemoSubscribed(sub);
+    if (sub) {
+      setAllDevices(DEMO_DEVICES);
+      // Load saved demo preferences
+      const savedPrefs = typeof window !== "undefined" ? localStorage.getItem("sicita_demo_notif_prefs") : null;
+      if (savedPrefs) {
+        try {
+          setSelectedDeviceIds(new Set(JSON.parse(savedPrefs)));
+        } catch {
+          setSelectedDeviceIds(new Set(DEMO_DEVICES.map(d => d.device_id)));
+        }
+      } else {
+        setSelectedDeviceIds(new Set(DEMO_DEVICES.map(d => d.device_id)));
+      }
+    }
+    setIsLoading(false);
+  }, [isDemoMode]);
+
+  useEffect(() => {
+    if (isDemoMode) return;
     if (sessionStatus === "loading") return;
     if (sessionStatus === "unauthenticated") {
       router.push(
         `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
       );
     }
-  }, [sessionStatus, router]);
+  }, [isDemoMode, sessionStatus, router]);
 
   useEffect(() => {
+    if (isDemoMode) return; // Demo mode handles its own init
     if (sessionStatus === "authenticated") {
       if (
         typeof window !== "undefined" &&
@@ -201,6 +230,19 @@ export default function NotificationPreferencesPage() {
   };
 
   const handleSavePreferences = async () => {
+    // Demo mode: save to localStorage
+    if (isDemoMode) {
+      setIsSaving(true);
+      setTimeout(() => {
+        localStorage.setItem("sicita_demo_notif_prefs", JSON.stringify(Array.from(selectedDeviceIds)));
+        setIsSaving(false);
+        toast.success("Sukses!", {
+          description: "Preferensi notifikasi berhasil disimpan. (Demo)",
+        });
+      }, 600);
+      return;
+    }
+
     if (
       !currentSubscription ||
       !currentSubscription.endpoint ||
@@ -338,7 +380,7 @@ export default function NotificationPreferencesPage() {
             Push-nya. Fitur ini memerlukan Anda untuk mengaktifkan notifikasi
             push di browser terlebih dahulu.
           </p>
-          {!currentSubscription &&
+          {!currentSubscription && !isDemoMode &&
             !isLoading && ( // Tambahan jika belum subscribe
               <p className="text-center text-sm text-orange-600 dark:text-orange-400 mt-2">
                 Anda belum mengaktifkan notifikasi push. Silakan aktifkan
@@ -352,13 +394,18 @@ export default function NotificationPreferencesPage() {
                 Anda.
               </p>
             )}
+          {isDemoMode && !demoSubscribed && !isLoading && (
+            <p className="text-center text-sm text-orange-600 dark:text-orange-400 mt-2">
+              Anda belum mengaktifkan notifikasi push. Silakan aktifkan di halaman Dashboard terlebih dahulu.
+            </p>
+          )}
         </header>
-        {currentSubscription && allDevices.length === 0 && !isLoading && (
+        {(currentSubscription || (isDemoMode && demoSubscribed)) && allDevices.length === 0 && !isLoading && (
           <p className="text-center text-gray-500 dark:text-gray-400">
             Tidak ada perangkat yang tersedia untuk dipilih.
           </p>
         )}
-        {currentSubscription && allDevices.length > 0 && (
+        {(currentSubscription || (isDemoMode && demoSubscribed)) && allDevices.length > 0 && (
           <Card className="w-full max-w-lg mx-auto">
             <CardHeader>
               <CardTitle>Pilih Perangkat</CardTitle>
@@ -398,7 +445,7 @@ export default function NotificationPreferencesPage() {
             <CardFooter>
               <Button
                 onClick={handleSavePreferences}
-                disabled={isSaving || isLoading || !currentSubscription}
+                disabled={isSaving || isLoading || (!currentSubscription && !(isDemoMode && demoSubscribed))}
               >
                 {isSaving ? (
                   <>
