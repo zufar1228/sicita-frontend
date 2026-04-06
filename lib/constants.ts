@@ -1,0 +1,4 @@
+// src/lib/constants.ts
+export const RAINFALL_THRESHOLD_NO_RAIN_MAX = 50;
+export const RAINFALL_THRESHOLD_LIGHT_RAIN_MAX = 1000;
+export const RAINFALL_THRESHOLD_MODERATE_RAIN_MAX = 2500;

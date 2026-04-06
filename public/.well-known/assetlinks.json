@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.sicita",
+      "sha256_cert_fingerprints": [
+        "F9:BC:A7:77:61:D0:4E:29:A4:3C:29:7E:BC:0C:90:73:E2:B9:65:8B:82:44:84:85:64:A4:83:A5:84:01:05:7F"
+      ]
+    }
+  }
+]
