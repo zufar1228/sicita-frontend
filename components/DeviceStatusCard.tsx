@@ -492,12 +492,14 @@ export default function DeviceStatusCard({
       >
         <CardHeader className="pb-3 pt-4 px-4">
           <div className="flex justify-between items-start gap-2">
-            <CardTitle className="text-base font-semibold truncate flex items-center">
-              {mainIcon}
-              <span className="ml-2 ">
-                {currentDevice.name || currentDevice.device_id}
-              </span>
-            </CardTitle>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-base font-semibold truncate flex items-center">
+                {mainIcon}
+                <span className="ml-2 truncate">
+                  {currentDevice.name || currentDevice.device_id}
+                </span>
+              </CardTitle>
+            </div>
             <div className="flex flex-col items-end space-y-1 flex-shrink-0">
               {statusBadges}
             </div>
@@ -527,12 +529,14 @@ export default function DeviceStatusCard({
         className={`shadow-lg rounded-lg overflow-hidden border-destructive ${cardBgColor}`}
       >
         <CardHeader className="pb-3 pt-4 px-4">
-          <CardTitle className="text-base font-semibold truncate flex items-center">
-            <AlertTriangle className="h-4 w-4 text-destructive mr-2" />
-            <span className="ml-2 ">
-              {currentDevice.name || currentDevice.device_id}
-            </span>
-          </CardTitle>
+          <div className="min-w-0">
+            <CardTitle className="text-base font-semibold truncate flex items-center">
+              <AlertTriangle className="h-4 w-4 text-destructive mr-2 flex-shrink-0" />
+              <span className="truncate">
+                {currentDevice.name || currentDevice.device_id}
+              </span>
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="text-center text-xs text-destructive py-4">
           Gagal memuat data sensor.{" "}
@@ -558,12 +562,14 @@ export default function DeviceStatusCard({
     >
       <CardHeader className="pb-3 pt-4 px-4">
         <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-base font-semibold truncate flex items-center">
-            {mainIcon}
-            <span className="ml-2 ">
-              {currentDevice.name || currentDevice.device_id}
-            </span>
-          </CardTitle>
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base font-semibold truncate flex items-center">
+              {mainIcon}
+              <span className="ml-2 truncate">
+                {currentDevice.name || currentDevice.device_id}
+              </span>
+            </CardTitle>
+          </div>
           <div className="flex flex-col items-end space-y-1 flex-shrink-0">
             {statusBadges}
           </div>

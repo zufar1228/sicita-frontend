@@ -59,12 +59,20 @@ function handleDemoRequest(url: string, options?: RequestInit): Response | null 
       const alerts = generateDemoAlerts(50);
       const start = (page - 1) * limit;
       const paginatedAlerts = alerts.slice(start, start + limit);
+      const totalPages = Math.ceil(alerts.length / limit);
       return jsonResponse({
         data: paginatedAlerts,
+        pagination: {
+          total: alerts.length,
+          page,
+          limit,
+          totalPages,
+        },
+        // Also include at root level for compatibility
         total: alerts.length,
         page,
         limit,
-        totalPages: Math.ceil(alerts.length / limit),
+        totalPages,
       });
     }
 

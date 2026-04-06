@@ -126,7 +126,7 @@ export default function AllHistoryPage() {
 
       const result = await response.json();
       setAlerts(result.data);
-      setPageCount(result.pagination.totalPages);
+      setPageCount(result.pagination?.totalPages ?? result.totalPages ?? 0);
     } catch (err) {
       setError(
         err instanceof Error

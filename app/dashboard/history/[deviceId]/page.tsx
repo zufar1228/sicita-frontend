@@ -213,7 +213,7 @@ export default function DeviceHistoryPage() {
 
       const result = await response.json();
       setAlertHistory(result.data);
-      setAlertTotalPages(result.pagination.totalPages);
+      setAlertTotalPages(result.pagination?.totalPages ?? result.totalPages ?? 0);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan.";
       setAlertError(message);
